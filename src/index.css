@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #5b06bd;
+  --color-primary-container: #42048d;
+  --color-on-primary: #ffffff;
+  --color-secondary: #7e22ce;
+  --color-background: #f8f5ff;
+  --color-on-background: #1e1b2e;
+  --color-surface: #ffffff;
+  --color-on-surface: #1e1b2e;
+  --color-on-surface-variant: #4b4461;
+  --color-liquid-purple: #380468;
+}
+
+@layer utilities {
+  /* ═══════════════════════════════════════════════════════════
+     LIQUID GLASS — Para paneles, ventanas modales y drawers.
+     Los botones usan exclusivamente las clases neu-*.
+     ═══════════════════════════════════════════════════════════ */
+  .liquid-glass {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(240, 228, 255, 0.72) 40%,
+      rgba(255, 255, 255, 0.78) 100%
+    );
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-top: 1.5px solid rgba(255, 255, 255, 1);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25);
+    border-right: 1px solid rgba(139, 92, 246, 0.18);
+    box-shadow:
+      0 8px 32px rgba(91, 6, 189, 0.18),
+      0 2px 8px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(139, 92, 246, 0.1);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Variante oscura para drawers laterales */
+  .liquid-glass-dark {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 10, 60, 0.88) 0%,
+      rgba(55, 20, 100, 0.82) 50%,
+      rgba(30, 10, 60, 0.88) 100%
+    );
+    backdrop-filter: blur(32px) saturate(160%);
+    -webkit-backdrop-filter: blur(32px) saturate(160%);
+    border-top: 1.5px solid rgba(180, 130, 255, 0.35);
+    border-left: 1.5px solid rgba(180, 130, 255, 0.25);
+    border-bottom: 1px solid rgba(80, 20, 140, 0.5);
+    border-right: 1px solid rgba(80, 20, 140, 0.4);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.45),
+      0 0 60px rgba(91, 6, 189, 0.2),
+      inset 0 1px 0 rgba(180, 130, 255, 0.3);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Variante para barras (header / bottom nav) */
+  .liquid-glass-bar {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(243, 232, 255, 0.80) 100%
+    );
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border-top: 1.5px solid rgba(255, 255, 255, 1);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow:
+      0 4px 24px rgba(91, 6, 189, 0.12),
+      0 1px 4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+  }
+
+  .neu-raised {
+    border-radius: 90px;
+    background: linear-gradient(145deg, #f0f0f0, #cacaca);
+    box-shadow: 6px 6px 12px #a6a6a6, -6px -6px 12px #ffffff;
+  }
+
+  .neu-pressed {
+    border-radius: 90px;
+    background: #e0e0e0;
+    box-shadow: inset 6px 6px 12px #a6a6a6, inset -6px -6px 12px #ffffff;
+  }
+
+  .neu-card {
+    border-radius: 24px;
+    background: #e0e0e0;
+    box-shadow: 12px 12px 24px #bebebe, -12px -12px 24px #ffffff;
+  }
+
+  .neu-card-inset {
+    border-radius: 20px;
+    background: #e0e0e0;
+    box-shadow: inset 6px 6px 12px #a6a6a6, inset -6px -6px 12px #ffffff;
+  }
+
+  .neu-btn-primary-raised {
+    border-radius: 90px;
+    background: linear-gradient(145deg, #6b21a8, #4c1d95);
+    box-shadow: 6px 6px 14px rgba(76, 29, 149, 0.45), -4px -4px 10px rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+  }
+
+  .neu-btn-primary-pressed {
+    border-radius: 90px;
+    background: #4c1d95;
+    box-shadow: inset 5px 5px 10px #2e1065, inset -5px -5px 10px #6b21a8;
+    color: #ffffff;
+  }
+
+  .neu-input {
+    border-radius: 18px;
+    background: #e0e0e0;
+    box-shadow: inset 4px 4px 8px #a6a6a6, inset -4px -4px 8px #ffffff;
+  }
+
+  .neu-bar {
+    background: #e0e0e0;
+    box-shadow: 0px -6px 20px rgba(0, 0, 0, 0.12), inset 0px 1px 2px rgba(255, 255, 255, 0.8);
+  }
+
+  .organic-blob {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    animation: drift 12s infinite alternate ease-in-out;
+  }
+  .siri-orb {
+    background: conic-gradient(from 0deg at 50% 50%, #9333ea, #3b82f6, #06b6d4, #ec4899, #8b5cf6, #9333ea);
+    animation: rotateSiri 4s linear infinite;
+    filter: blur(12px);
+  }
+
+  .siri-orb-core {
+    background: radial-gradient(circle, rgba(168,85,247,0.9) 0%, rgba(99,102,241,0.8) 50%, rgba(59,130,246,0) 100%);
+    animation: pulseSiri 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes rotateSiri {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes pulseSiri {
+  0% { opacity: 0.7; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes waveBar {
+  0%, 100% { height: 8px; }
+  50% { height: 24px; }
+}
+
+.animate-wave-1 { animation: waveBar 1.2s ease-in-out infinite; }
+.animate-wave-2 { animation: waveBar 1.2s ease-in-out infinite 0.2s; }
+.animate-wave-3 { animation: waveBar 1.2s ease-in-out infinite 0.4s; }
+.animate-wave-4 { animation: waveBar 1.2s ease-in-out infinite 0.6s; }
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(25px, -25px) scale(1.08);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideLeft {
+  animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+body {
+  background: #e0e0e0;
+  color: #1e1b2e;
+  min-height: 100vh;
+}

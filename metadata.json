@@ -1,0 +1,6 @@
+{
+  "name": "Moradetec",
+  "description": "Aplicación inteligente de diagnóstico agrícola fitosanitario y aprendizaje para gestión de cultivos de rosas y ecosistemas andinos.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

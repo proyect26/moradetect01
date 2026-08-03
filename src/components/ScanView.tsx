@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Language, ScanResult, DiseaseActivity } from '../types';
 import { Modal } from './Modal';
+import { runInference } from '../utils/tfliteInference';
 
 interface ScanViewProps {
   lang: Language;
@@ -159,193 +160,36 @@ export const ScanView: React.FC<ScanViewProps> = ({ lang, onAddActivity, onGoToD
     setErrorMsg(null);
 
     try {
-      const response = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: selectedImage,
-          mimeType: 'image/jpeg',
-          cropType: 'Mora de Castilla (Rubus glaucus)',
-          notes: cropNote,
-          modelType: modelMode,
-          customModelUrl: modelMode === 'colab' ? colabUrl.trim() : ''
-        }),
-      });
-
-      const resData = await response.json();
-      if (resData.success && resData.data) {
-        setScanResult(resData.data);
+      if (modelMode === 'tflite') {
+        const result = await runInference(selectedImage);
+        setScanResult(result);
       } else {
-        throw new Error(resData.error || 'Failed to scan image');
+        // Fetch to backend API for Colab/Gemini options
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: selectedImage,
+            mimeType: 'image/jpeg',
+            cropType: 'Mora de Castilla (Rubus glaucus)',
+            notes: cropNote,
+            modelType: modelMode,
+            customModelUrl: modelMode === 'colab' ? colabUrl.trim() : ''
+          }),
+        });
+
+        const resData = await response.json();
+        if (resData.success && resData.data) {
+          setScanResult(resData.data);
+        } else {
+          throw new Error(resData.error || 'Failed to scan image');
+        }
       }
     } catch (err: any) {
       console.error('Scan error:', err);
-      // Dynamic fallback response based on image characteristics / notes
-      const imgStr = (selectedImage || '').toLowerCase();
-      const noteStr = (cropNote || '').toLowerCase();
-      const combined = imgStr + noteStr;
-
-      if (combined.includes('powdery') || combined.includes('polvoso') || combined.includes('oidio')) {
-        setScanResult({
-          pathogenName: 'Podosphaera pannosa (Mildeo Polvoso)',
-          scientificName: 'Podosphaera pannosa',
-          commonName: 'Mildeo Polvoso / Cenicilla',
-          confidence: 97.8,
-          severity: 'MODERADO',
-          symptoms: [
-            'Eflorescencia blanquecina polvo micelial en superficie foliar.',
-            'Deformación leve de foliolos jóvenes.',
-            'Reducción fotosintética en brotes terminales.'
-          ],
-          controlMeasures: [
-            'Aplicar azufre elemental o bicarbonato de potasio.',
-            'Riego por goteo evitando mojar el follaje tarde.',
-            'Poda de aireación en la copa.'
-          ],
-          phytosanitaryNotes: 'Oídio característico detectado por el motor Moradetec AI.'
-        });
-      } else if (combined.includes('downy') || combined.includes('peronospora') || combined.includes('velloso')) {
-        setScanResult({
-          pathogenName: 'Peronospora sparsa (Mildeo Velloso)',
-          scientificName: 'Peronospora sparsa',
-          commonName: 'Mildeo Velloso / Peronospora',
-          confidence: 96.5,
-          severity: 'URGENTE',
-          symptoms: [
-            'Manchas angulares rojizas-púrpura delimitadas por nervaduras.',
-            'Vello grisáceo discreto en el envés de la hoja.',
-            'Defoliación prematura en ramas bajas.'
-          ],
-          controlMeasures: [
-            'Aplicar Metalaxil + Mancozeb o Fosetyl-Al.',
-            'Retirar hojas infectadas caídas.',
-            'Ventilación en hileras de cultivo.'
-          ],
-          phytosanitaryNotes: 'Mildeo velloso detectado con precisión en la muestra agrícola.'
-        });
-      } else if (combined.includes('healthy') || combined.includes('sano') || combined.includes('limpio')) {
-        setScanResult({
-          pathogenName: 'Planta Saludable (Rubus glaucus)',
-          scientificName: 'Rubus glaucus Benth Sano',
-          commonName: 'Follaje Sano / Sin Enfermedad',
-          confidence: 99.2,
-          severity: 'NORMAL',
-          symptoms: [
-            'Tejido vegetal verde turgente y uniforme.',
-            'Sin manchas necróticas ni esporulación fúngica.',
-            'Estructura foliar intacta en estado óptimo.'
-          ],
-          controlMeasures: [
-            'Mantener plan de nutrición foliar balanceado.',
-            'Aplicar bioestimulantes preventivos.',
-            'Monitoreo semanal del lote.'
-          ],
-          phytosanitaryNotes: 'Planta en excelente estado sanitario sin patógenos detectados.'
-        });
-      } else if (combined.includes('antracnosis') || combined.includes('colletotrichum')) {
-        setScanResult({
-          pathogenName: 'Colletotrichum gloeosporioides (Antracnosis)',
-          scientificName: 'Colletotrichum gloeosporioides',
-          commonName: 'Antracnosis / Muerte Descendente',
-          confidence: 98.1,
-          severity: 'CRÍTICO',
-          symptoms: [
-            'Lesiones necróticas cóncavas oscuras en hojas y tallos.',
-            "Acérvulos de esporas asalmonadas en zonas necróticas.",
-            'Secamiento del ápice hacia la base.'
-          ],
-          controlMeasures: [
-            'Poda sanitaria de tallos infectados con cicatrización.',
-            'Aplicación de Difenoconazol o Prochloraz.',
-            'Desinfección de herramientas de poda.'
-          ],
-          phytosanitaryNotes: 'Infección por Antracnosis confirmada por Visión IA Moradetec.'
-        });
-      } else {
-        // Hash selection for variety
-        let hash = 0;
-        for (let i = 0; i < Math.min(selectedImage.length, 300); i += 7) {
-          hash += selectedImage.charCodeAt(i);
-        }
-        const mod = Math.abs(hash) % 4;
-
-        if (mod === 0) {
-          setScanResult({
-            pathogenName: 'Colletotrichum gloeosporioides (Antracnosis)',
-            scientificName: 'Colletotrichum gloeosporioides',
-            commonName: 'Antracnosis de la Mora',
-            confidence: 97.6,
-            severity: 'CRÍTICO',
-            symptoms: [
-              'Manchas necróticas oscuras en lámina foliar y peciolo.',
-              'Puntos negros de fructificación en tejidos secos.',
-              'Afectación parcial de brotes productivos.'
-            ],
-            controlMeasures: [
-              'Poda sanitaria y desinfección de herramientas.',
-              'Aplicación de fungicidas sistémicos específicos.',
-              'Evitar humedad prolongada sobre el follaje.'
-            ],
-            phytosanitaryNotes: 'Diagnóstico de Antracnosis en muestra de Mora de Castilla.'
-          });
-        } else if (mod === 1) {
-          setScanResult({
-            pathogenName: 'Podosphaera pannosa (Mildeo Polvoso)',
-            scientificName: 'Podosphaera pannosa',
-            commonName: 'Mildeo Polvoso / Oídio',
-            confidence: 98.0,
-            severity: 'MODERADO',
-            symptoms: [
-              'Polvillo blanco en el haz foliar.',
-              'Enrollamiento hacia arriba de bordes foliares.',
-              'Reducción del vigor fotosintético.'
-            ],
-            controlMeasures: [
-              'Aplicación de azufre o bicarbonato de potasio.',
-              'Mejorar ventilación en la estructura.',
-              'Manejo de fertilización nitrogenada.'
-            ],
-            phytosanitaryNotes: 'Identificado Mildeo Polvoso con éxito.'
-          });
-        } else if (mod === 2) {
-          setScanResult({
-            pathogenName: 'Peronospora sparsa (Mildeo Velloso)',
-            scientificName: 'Peronospora sparsa',
-            commonName: 'Mildeo Velloso / Gota',
-            confidence: 96.1,
-            severity: 'URGENTE',
-            symptoms: [
-              'Manchas angulares moradas o rojas entre nervaduras.',
-              'Eflorescencia gris tenue en el envés.',
-              'Riesgo de defoliación en el tercio inferior.'
-            ],
-            controlMeasures: [
-              'Fungicida sistémico en rotación FRAC.',
-              'Ajustar sistema de riego.',
-              'Uso de inductores de resistencia.'
-            ],
-            phytosanitaryNotes: 'Peronospora identificada en tejidos foliares.'
-          });
-        } else {
-          setScanResult({
-            pathogenName: 'Planta Saludable (Rubus glaucus)',
-            scientificName: 'Rubus glaucus Sano',
-            commonName: 'Cultivo Sano / Sin Patógenos',
-            confidence: 99.3,
-            severity: 'NORMAL',
-            symptoms: [
-              'Follaje verde intenso turgente y limpio.',
-              'Sin evidencia de manchas o esporulación.',
-              'Crecimiento activo y vigoroso.'
-            ],
-            controlMeasures: [
-              'Continuar nutrición balanceada.',
-              'Mantenimiento preventivo de rutina.'
-            ],
-            phytosanitaryNotes: 'Muestra analizada en excelente estado fitosanitario.'
-          });
-        }
-      }
+      setErrorMsg(
+        lang === 'es' ? `Error ejecutando inferencia: ${err.message}` : `Inference error: ${err.message}`
+      );
     } finally {
       setIsScanning(false);
     }

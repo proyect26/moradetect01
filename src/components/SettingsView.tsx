@@ -26,7 +26,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }
   }, [initialSection]);
   // AI Model Configuration State
-  const [modelFileName, setModelFileName] = useState<string>('best.tflite');
+  const [modelFileName, setModelFileName] = useState<string>('modelo_mora.tflite');
   const [modelStatusMsg, setModelStatusMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

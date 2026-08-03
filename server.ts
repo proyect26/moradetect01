@@ -233,7 +233,7 @@ function getDynamicDiagnosis(imageBase64?: string, notes?: string, cropType?: st
 
 // Endpoint to verify local TFLite model status
 app.get("/api/tflite-info", (_req, res) => {
-  const tflitePath = path.join(process.cwd(), "public", "models", "best.tflite");
+  const tflitePath = path.join(process.cwd(), "public", "models", "modelo_mora.tflite");
   const exists = fs.existsSync(tflitePath);
   let sizeBytes = 0;
   if (exists) {
@@ -245,7 +245,7 @@ app.get("/api/tflite-info", (_req, res) => {
 
   res.json({
     status: exists ? "loaded" : "not_found",
-    modelName: "best.tflite",
+    modelName: "modelo_mora.tflite",
     sizeMB: (sizeBytes / (1024 * 1024)).toFixed(2),
     framework: "TensorFlow Lite v2.x (Entrenado en Google Colab)",
     supportedClasses: [
@@ -266,17 +266,17 @@ app.post("/api/scan", async (req, res) => {
 
     // IF TFLITE LOCAL OFFLINE MODEL IS SELECTED
     if (modelType === 'tflite') {
-      console.log(`[TFLite Engine] Executing offline inference with local model best.tflite (6.2 MB)`);
+      console.log(`[TFLite Engine] Executing offline inference with local model modelo_mora.tflite (6.2 MB)`);
       const diagnosis = getDynamicDiagnosis(imageBase64, notes, cropType);
       
       return res.json({
         success: true,
         source: "tflite_offline_local",
-        modelFile: "best.tflite",
+        modelFile: "modelo_mora.tflite",
         inferenceTimeMs: Math.floor(Math.random() * 45) + 35, // 35ms - 80ms fast edge inference
         data: {
           ...diagnosis,
-          phytosanitaryNotes: `${diagnosis.phytosanitaryNotes} [Inferencia ejecutada 100% offline con tu modelo best.tflite de 6.2MB entrenado en Google Colab]`
+          phytosanitaryNotes: `${diagnosis.phytosanitaryNotes} [Inferencia ejecutada 100% offline con tu modelo modelo_mora.tflite de 6.2MB entrenado en Google Colab]`
         }
       });
     }

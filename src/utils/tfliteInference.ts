@@ -96,13 +96,30 @@ const CLASSES = [
       'Mantener podas de aireación adecuadas.'
     ],
     phytosanitaryNotes: 'Roya detectada por la IA. Suele presentarse en condiciones de humedad y temperaturas medias.'
+  },
+  {
+    pathogenName: 'Clase Extra 6 (No Identificada)',
+    scientificName: 'N/A',
+    commonName: 'Otra / Desconocida',
+    severity: 'NORMAL',
+    symptoms: ['Posiblemente fondo, hoja sana o clase adicional.'],
+    controlMeasures: ['N/A'],
+    phytosanitaryNotes: 'Clase adicional detectada en el modelo de 7 clases.'
+  },
+  {
+    pathogenName: 'Clase Extra 7 (No Identificada)',
+    scientificName: 'N/A',
+    commonName: 'Otra / Desconocida',
+    severity: 'NORMAL',
+    symptoms: ['Posiblemente fondo, hoja sana o clase adicional.'],
+    controlMeasures: ['N/A'],
+    phytosanitaryNotes: 'Clase adicional detectada en el modelo de 7 clases.'
   }
 ];
 
 export async function initializeModel() {
   if (model) return;
   if (isInitializing) {
-    // Wait until initialized
     while (isInitializing) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -112,15 +129,26 @@ export async function initializeModel() {
   isInitializing = true;
   try {
     console.log('[TFLite] Inicializando TensorFlow.js...');
-    await tf.setBackend('webgl'); // Intenta usar GPU primero
+    await tf.setBackend('webgl'); 
     await tf.ready();
     
-    // Ruta a los archivos WASM
-    // En Capacitor/Vite, estos estarán en /tflite/
     tflite.setWasmPath('/tflite/');
     
-    console.log('[TFLite] Cargando modelo_mora.tflite...');
-    model = await tflite.loadTFLiteModel('/models/modelo_mora.tflite');
+    console.log('[TFLite] Descargando modelo_mora.tflite a memoria...');
+    const response = await fetch('/models/modelo_mora.tflite');
+    if (!response.ok) {
+      throw new Error(`Error de red al cargar el modelo: ${response.status}`);
+    }
+    const buffer = await response.arrayBuffer();
+    const view = new Uint8Array(buffer);
+    
+    // Si el servidor entregó un HTML (ej. index.html) por error de ruteo
+    if (view.length > 0 && view[0] === 60) { // '<'
+      throw new Error('El servidor bloqueó el archivo .tflite y devolvió HTML. Problema de configuración en el celular.');
+    }
+
+    console.log('[TFLite] Cargando modelo en memoria (buffer)...');
+    model = await tflite.loadTFLiteModel(buffer);
     console.log('[TFLite] Modelo cargado con éxito.');
   } catch (error) {
     console.error('[TFLite] Error cargando modelo:', error);
